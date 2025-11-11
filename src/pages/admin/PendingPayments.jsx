@@ -5,7 +5,7 @@ import { collection, getDocs } from "firebase/firestore";
 export default function PendingPayments() {
   const [hostlers, setHostlers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const siteLink = "https://crownhostel-bb4da.web.app/"; // 🔗 replace with your actual site URL
+  const siteLink = "https://crownhostel-bb4da.web.app"; // ✅ your Firebase site URL
 
   useEffect(() => {
     const fetchHostlers = async () => {
@@ -21,7 +21,7 @@ export default function PendingPayments() {
 
         if (!data.nextPaymentDate) continue;
 
-        // ✅ Convert nextPaymentDate (Firestore Timestamp or JS Date)
+        // ✅ Convert Firestore Timestamp or Date
         const nextPaymentDate = new Date(
           data.nextPaymentDate.seconds
             ? data.nextPaymentDate.seconds * 1000
@@ -50,10 +50,8 @@ export default function PendingPayments() {
   }, []);
 
   const handleSendMessage = (h) => {
-    const message = `Hello ${h.name}, your payment of ₹${h.price} is pending.\nDue Date: ${h.dueDate}\nPlease pay here: ${siteLink}`;
-    const whatsappLink = `https://wa.me/${h.phone}?text=${encodeURIComponent(
-      message
-    )}`;
+    const message = `Hello ${h.name}, your payment of ₹${h.price} is pending.%0ADue Date: ${h.dueDate}%0APlease pay here: ${siteLink}`;
+    const whatsappLink = `https://wa.me/${h.phone}?text=${message}`;
 
     if (h.phone && h.phone !== "N/A") {
       window.open(whatsappLink, "_blank");
