@@ -5,7 +5,7 @@ import { collection, getDocs } from "firebase/firestore";
 export default function PendingPayments() {
   const [hostlers, setHostlers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const siteLink = "https://yourappurl.com"; // 🔗 replace with your actual site URL
+  const siteLink = "https://crownhostel-bb4da.web.app/"; // 🔗 replace with your actual site URL
 
   useEffect(() => {
     const fetchHostlers = async () => {
