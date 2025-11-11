@@ -18,6 +18,7 @@ import PaymentDetails from "../pages/admin/paymentDetails";
 import PendingPayments from "../pages/admin/PendingPayments";
 import EditRoom from "../pages/admin/EditRoom";
 import EditHostler from "../pages/admin/EditHostler";
+import PaymentHistory from "../pages/admin/PaymentHistory";
 
 
 
@@ -56,6 +57,7 @@ export default function Index() {
           <Route path="pendingpayments" element={<PendingPayments />} />
           <Route path="edit-room/:id" element={<EditRoom/>}/>
           <Route path="edit-hostler/:id" element={<EditHostler />} />
+          <Route path="payment-history/:hostlerId" element={<PaymentHistory />} />
 
 
         </Route>

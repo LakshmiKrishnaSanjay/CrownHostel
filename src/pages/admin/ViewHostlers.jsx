@@ -102,7 +102,7 @@ export default function ViewHostlers() {
               <th className="px-5 py-3 font-medium text-gray-600">Room</th>
               <th className="px-5 py-3 font-medium text-gray-600">Bed</th>
               <th className="px-5 py-3 font-medium text-gray-600">Status</th>
-              <th className="px-5 py-3 font-medium text-gray-600">Rent Amount</th>
+              <th className="px-5 py-3 font-medium text-gray-600">Rent</th>
               <th className="px-5 py-3 font-medium text-gray-600">Joining Date</th>
               <th className="px-5 py-3 font-medium text-gray-600">Next Payment</th>
               <th className="px-5 py-3 font-medium text-gray-600 text-center">Actions</th>
@@ -111,13 +111,19 @@ export default function ViewHostlers() {
           <tbody className="divide-y">
             {filteredHostlers.map((h) => (
               <tr key={h.id} className="hover:bg-gray-50 transition">
-                <td className="px-5 py-4 flex items-center gap-3">
-                  {h.image && <img src={h.image} alt={h.name} className="w-10 h-10 rounded-full object-cover border" />}
-                  <p className="font-medium text-gray-800">{h.name}</p>
-                </td>
+<td className="px-5 py-4 flex items-center gap-3">
+  {h.image && <img src={h.image} alt={h.name} className="w-10 h-10 rounded-full object-cover border" />}
+  <button
+    onClick={() => navigate(`/admin/payment-history/${h.id}`)}
+    className="font-medium text-blue-600 hover:underline"
+  >
+    {h.name}
+  </button>
+</td>
+
                 <td className="px-5 py-4 text-gray-600">{h.phone}</td>
                 <td className="px-5 py-4 text-gray-600">{h.aadhar}</td>
-                <td className="px-5 py-4 text-gray-600">{h.roomNumber || h.roomId}</td>
+                <td className="px-5 py-4 text-gray-600">{h.roomNumber}</td>
                 <td className="px-5 py-4 text-gray-600">{h.bedNo}</td>
                 <td className="px-5 py-4">
                   <span
@@ -130,9 +136,13 @@ export default function ViewHostlers() {
                     {h.status}
                   </span>
                 </td>
-                <td className="px-5 py-4 text-gray-600">₹{h.price}</td>
-                <td className="px-5 py-4 text-gray-600">{h.joiningDate}</td>
-                <td className="px-5 py-4 text-gray-600">{h.nextPaymentDate}</td>
+                <td className="px-5 py-4 text-gray-600">₹{h.price}</td><td className="px-5 py-4 text-gray-600">
+  {new Date(h.joiningDate).toLocaleDateString("en-GB")}
+</td>
+<td className="px-5 py-4 text-gray-600">
+  {new Date(h.nextPaymentDate).toLocaleDateString("en-GB")}
+</td>
+
                 <td className="px-5 py-4 text-center">
 
                   <button
