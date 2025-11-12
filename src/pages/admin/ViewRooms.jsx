@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Edit, Trash2 } from "lucide-react";
 import { db } from "../../firebase/firebaseConfig";
-import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, doc, deleteDoc, orderBy, query } from "firebase/firestore";
 
 export default function ViewRooms() {
   const [filter, setFilter] = useState("all");
@@ -12,7 +12,10 @@ export default function ViewRooms() {
   const fetchRooms = async () => {
     setLoading(true);
     try {
-      const snapshot = await getDocs(collection(db, "rooms"));
+      const roomsRef = collection(db, "rooms");
+      const q = query(roomsRef, orderBy("createdAt", "asc"));
+      const snapshot = await getDocs(q);
+
       const roomsData = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),

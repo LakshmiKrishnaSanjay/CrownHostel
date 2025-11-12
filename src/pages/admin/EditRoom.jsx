@@ -1,11 +1,21 @@
 import { useState, useEffect } from "react";
 import { db } from "../../firebase/firebaseConfig";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  writeBatch,
+} from "firebase/firestore";
 import { useParams, useNavigate } from "react-router-dom";
 
 export default function EditRoom() {
   const { id } = useParams(); // room id from URL
   const navigate = useNavigate();
+
   const [roomNumber, setRoomNumber] = useState("");
   const [beds, setBeds] = useState(0);
   const [bedNumbers, setBedNumbers] = useState([]);
@@ -23,7 +33,7 @@ export default function EditRoom() {
           const data = roomSnap.data();
           setRoomNumber(data.roomNumber || "");
           setBeds(data.beds || 0);
-          setBedNumbers(data.bedNumbers?.map((b) => b.number) || []);
+          setBedNumbers(data.bedNumbers || []);
           setPrice(data.price || 0);
           setToilet(data.toilet || "Yes");
         } else {
@@ -45,7 +55,8 @@ export default function EditRoom() {
     setBedNumbers((prev) => {
       const updated = [...prev];
       if (count > prev.length) {
-        for (let i = prev.length; i < count; i++) updated.push("");
+        for (let i = prev.length; i < count; i++)
+          updated.push({ number: "", status: "vacant" });
       } else {
         updated.length = count;
       }
@@ -56,14 +67,14 @@ export default function EditRoom() {
   // Handle bed number input
   const handleBedNumberChange = (index, value) => {
     const updated = [...bedNumbers];
-    updated[index] = value;
+    updated[index].number = value;
     setBedNumbers(updated);
   };
 
   // Validate form
   const validateForm = () => {
     if (!roomNumber.trim()) return "Room number is required";
-    if (beds > 0 && bedNumbers.some((bed) => !bed.trim()))
+    if (beds > 0 && bedNumbers.some((bed) => !bed.number.trim()))
       return "All bed numbers must be filled";
     if (!price || parseInt(price) <= 0) return "Price must be greater than 0";
     return null;
@@ -75,9 +86,11 @@ export default function EditRoom() {
     const errorMsg = validateForm();
     if (errorMsg) return alert(errorMsg);
 
+    // Keep old bed statuses (if already set)
     const bedsData = bedNumbers.map((bed) => ({
-      number: bed,
-      status: "vacant", // reset or maintain if needed
+      number: bed.number,
+      status: bed.status || "vacant",
+      hostler: bed.hostler || null,
     }));
 
     const roomStatus = bedsData.every((b) => b.status === "occupied")
@@ -95,7 +108,23 @@ export default function EditRoom() {
 
     try {
       setLoading(true);
+
+      // ✅ Update room details
       await updateDoc(doc(db, "rooms", id), updatedRoom);
+
+      // ✅ Update related hostlers with new room number
+      const hostlersRef = collection(db, "hostlers");
+      const q = query(hostlersRef, where("roomId", "==", id));
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        const batch = writeBatch(db);
+        snapshot.docs.forEach((docSnap) => {
+          batch.update(docSnap.ref, { roomNumber });
+        });
+        await batch.commit();
+      }
+
       alert("Room updated successfully!");
       navigate("/admin/viewroom");
     } catch (error) {
@@ -152,10 +181,8 @@ export default function EditRoom() {
                 <input
                   key={index}
                   type="text"
-                  value={bed}
-                  onChange={(e) =>
-                    handleBedNumberChange(index, e.target.value)
-                  }
+                  value={bed.number}
+                  onChange={(e) => handleBedNumberChange(index, e.target.value)}
                   required
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-indigo-500"
                   placeholder={`Bed ${index + 1} number`}

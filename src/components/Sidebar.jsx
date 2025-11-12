@@ -169,7 +169,7 @@ export default function Sidebar() {
                   }`
                 }
               >
-                Transactions
+                View Screenshots
               </NavLink>
             </div>
           )}
