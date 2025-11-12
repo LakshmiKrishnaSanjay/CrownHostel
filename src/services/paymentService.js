@@ -5,24 +5,22 @@ export const uploadPayment = async (
   hostlerId,
   name,
   amount,
-  numPayments,
   screenshot, // ✅ already base64 from frontend
   paymentDate
 ) => {
   try {
-    // 🆕 Always create a new document with unique ID
+    // 🆕 Create a new payment document
     await addDoc(collection(db, "payments"), {
       hostlerId,
       name,
       amount,
-      numPayments,
       screenshot,
       paymentDate: Timestamp.fromDate(new Date(paymentDate)),
       status: "pending",
       createdAt: Timestamp.now(),
     });
 
-    console.log("✅ New payment record created successfully.");
+    console.log("✅ Payment record created successfully.");
     return { success: true };
   } catch (error) {
     console.error("❌ Error uploading payment:", error);

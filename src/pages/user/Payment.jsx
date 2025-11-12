@@ -4,7 +4,6 @@ import { uploadPayment } from "../../services/paymentService";
 
 export default function Payment() {
   const [showPayment, setShowPayment] = useState(false);
-  const [numPayments, setNumPayments] = useState(1);
   const [hostler, setHostler] = useState(null);
   const [screenshot, setScreenshot] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -31,14 +30,20 @@ export default function Payment() {
 
   if (!hostler) return <p className="text-center mt-10">Loading...</p>;
 
-  const amount = numPayments * Number(hostler.price);
+  const amount = Number(hostler.price);
+
+  const formatDate = (dateValue) => {
+    const date = new Date(
+      dateValue.seconds ? dateValue.seconds * 1000 : dateValue
+    );
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
 
   const dueDate = hostler.nextPaymentDate
-    ? new Date(
-        hostler.nextPaymentDate.seconds
-          ? hostler.nextPaymentDate.seconds * 1000
-          : hostler.nextPaymentDate
-      ).toLocaleDateString()
+    ? formatDate(hostler.nextPaymentDate)
     : "N/A";
 
   const handleFileChange = (e) => {
@@ -56,14 +61,15 @@ export default function Payment() {
 
     setLoading(true);
     const paymentDate = new Date().toISOString();
+
     const res = await uploadPayment(
       hostler.id,
       hostler.name,
       amount,
-      numPayments,
       screenshot,
       paymentDate
     );
+
     setLoading(false);
 
     if (res.success) {
@@ -84,9 +90,7 @@ export default function Payment() {
         </h2>
         <p className="text-gray-600">
           Your next payment is not yet due. <br />
-          <span className="font-medium">
-            Next Payment Date: {dueDate}
-          </span>
+          <span className="font-medium">Next Payment Date: {dueDate}</span>
         </p>
       </div>
     );
@@ -121,21 +125,18 @@ export default function Payment() {
                 />
               </div>
 
-<div>
-  <label className="block font-medium mb-1">Due Date</label>
-  <input
-    type="text"
-    value={dueDate ? formatDate(dueDate) : ""}
-    disabled
-    className="w-full border border-gray-300 rounded-lg p-2 bg-gray-100"
-  />
-</div>
-
-
-
+              <div>
+                <label className="block font-medium mb-1">Due Date</label>
+                <input
+                  type="text"
+                  value={dueDate}
+                  disabled
+                  className="w-full border border-gray-300 rounded-lg p-2 bg-gray-100"
+                />
+              </div>
 
               <div>
-                <label className="block font-medium mb-1">Amount Per Month</label>
+                <label className="block font-medium mb-1">Amount</label>
                 <input
                   type="text"
                   value={`₹${amount}`}
