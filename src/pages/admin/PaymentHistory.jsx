@@ -10,6 +10,7 @@ export default function PaymentHistory() {
   const [loading, setLoading] = useState(true);
   const [statusText, setStatusText] = useState("");
   const [statusColor, setStatusColor] = useState("text-gray-600");
+  const [pendingInfo, setPendingInfo] = useState({ monthsPending: 0, pendingAmount: 0 });
 
   const toDate = (value) => {
     if (!value) return null;
@@ -63,7 +64,7 @@ export default function PaymentHistory() {
         const lastPayment = data.length ? data[data.length - 1] : null;
         const lastPaymentDate = lastPayment ? toDate(lastPayment.paymentDate) : null;
 
-        // determine dueDate: prefer hostler.nextPaymentDate, else lastPayment +1 month, else joining+1 month
+        // determine dueDate
         let dueDate = toDate(hData?.nextPaymentDate) || null;
         if (!dueDate) {
           if (lastPaymentDate) {
@@ -87,11 +88,15 @@ export default function PaymentHistory() {
           if (today <= dueDate) {
             setStatusText("Up to date");
             setStatusColor("text-green-600");
+            setPendingInfo({ monthsPending: 0, pendingAmount: 0 });
           } else {
-            // floor months between dueDate and today
             const fullMonths = monthsBetweenFloor(dueDate, today);
-            // count current partial month as full
             const monthsPending = fullMonths + 1;
+
+            const lastAmt = lastPayment?.amount || 0;
+            const pendingAmount = monthsPending * lastAmt;
+
+            setPendingInfo({ monthsPending, pendingAmount });
 
             if (monthsPending === 1) {
               setStatusText("1 month pending");
@@ -124,7 +129,6 @@ export default function PaymentHistory() {
     return `${day}/${month}/${year}`;
   };
 
-  // helper to compute shown due date (hostler.nextPaymentDate or lastPayment+1m or joining+1m)
   const computeShownDue = () => {
     if (hostler?.nextPaymentDate) return toDate(hostler.nextPaymentDate);
     if (payments.length) {
@@ -174,6 +178,12 @@ export default function PaymentHistory() {
         <p className="text-md text-gray-700">
           Due Date: <span className="font-medium">{shownDueDate ? formatDate(shownDueDate) : "-"}</span>
         </p>
+
+        {pendingInfo.monthsPending > 0 && (
+          <p className="text-md text-red-600 font-semibold mt-1">
+            Pending Amount: ₹{pendingInfo.pendingAmount.toLocaleString()}
+          </p>
+        )}
       </div>
 
       <h3 className="text-xl font-semibold mb-3">Payment History</h3>
