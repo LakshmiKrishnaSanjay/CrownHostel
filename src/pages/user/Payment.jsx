@@ -131,23 +131,10 @@ export default function Payment() {
                 />
               </div>
 
-              <div>
-                <label className="block font-medium mb-1">
-                  Number of Payments
-                </label>
-                <select
-                  className="w-full border border-gray-300 rounded-lg p-2"
-                  value={numPayments}
-                  onChange={(e) => setNumPayments(Number(e.target.value))}
-                >
-                  <option value={1}>1 Payment</option>
-                  <option value={2}>2 Payments</option>
-                  <option value={3}>3 Payments</option>
-                </select>
-              </div>
+
 
               <div>
-                <label className="block font-medium mb-1">Total Amount</label>
+                <label className="block font-medium mb-1">Amount Per Month</label>
                 <input
                   type="text"
                   value={`₹${amount}`}
