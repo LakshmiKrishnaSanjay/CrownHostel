@@ -121,15 +121,16 @@ export default function Payment() {
                 />
               </div>
 
-              <div>
-                <label className="block font-medium mb-1">Due Date</label>
-                <input
-                  type="text"
-                  value={dueDate}
-                  disabled
-                  className="w-full border border-gray-300 rounded-lg p-2 bg-gray-100"
-                />
-              </div>
+<div>
+  <label className="block font-medium mb-1">Due Date</label>
+  <input
+    type="text"
+    value={dueDate ? formatDate(dueDate) : ""}
+    disabled
+    className="w-full border border-gray-300 rounded-lg p-2 bg-gray-100"
+  />
+</div>
+
 
 
 
