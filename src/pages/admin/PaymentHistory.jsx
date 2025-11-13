@@ -197,7 +197,7 @@ export default function PaymentHistory() {
               <th className="border p-2">Room</th>
               <th className="border p-2">Joining Date</th>
               <th className="border p-2">Last Payment Date</th>
-              <th className="border p-2">Due Date</th>
+              <th className="border p-2">numPayments</th>
               <th className="border p-2">Amount</th>
             </tr>
           </thead>
@@ -210,7 +210,7 @@ export default function PaymentHistory() {
                 </td>
                 <td className="border p-2">{formatDate(hostler?.joiningDate)}</td>
                 <td className="border p-2">{p.paymentDate ? formatDate(p.paymentDate) : "No Payment"}</td>
-                <td className="border p-2">{shownDueDate ? formatDate(shownDueDate) : "-"}</td>
+                <td className="border p-2">{p.numPayments}</td>
                 <td className="border p-2">₹{p.amount}</td>
               </tr>
             ))}

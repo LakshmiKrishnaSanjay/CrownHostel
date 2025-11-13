@@ -17,6 +17,8 @@ export default function PaymentDetails() {
   const [payment, setPayment] = useState(null);
   const [hostler, setHostler] = useState(null);
   const [nextPaymentDate, setNextPaymentDate] = useState("");
+  const [numPayments, setNumPayments] = useState("");
+  const [amount, setAmount] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,6 +29,10 @@ export default function PaymentDetails() {
       const paymentData = { id: paymentDoc.id, ...paymentDoc.data() };
       setPayment(paymentData);
 
+      // Set existing values
+      setNumPayments(paymentData.numPayments || "");
+      setAmount(paymentData.amount || "");
+
       // Get hostler details
       const hostlerQuery = query(
         collection(db, "hostlers"),
@@ -35,7 +41,10 @@ export default function PaymentDetails() {
       const hostlerSnap = await getDocs(hostlerQuery);
 
       if (!hostlerSnap.empty) {
-        const hostlerData = { id: hostlerSnap.docs[0].id, ...hostlerSnap.docs[0].data() };
+        const hostlerData = {
+          id: hostlerSnap.docs[0].id,
+          ...hostlerSnap.docs[0].data(),
+        };
         setHostler(hostlerData);
 
         // ✅ Auto set next payment date = one month after existing nextPaymentDate
@@ -44,7 +53,6 @@ export default function PaymentDetails() {
           const newDate = new Date(oldDate);
           newDate.setMonth(newDate.getMonth() + 1);
 
-          // format to yyyy-MM-dd for input type="date"
           const formatted = newDate.toISOString().split("T")[0];
           setNextPaymentDate(formatted);
         }
@@ -55,8 +63,8 @@ export default function PaymentDetails() {
   }, [id]);
 
   const handleUpdate = async () => {
-    if (!nextPaymentDate) {
-      alert("Please select next payment date!");
+    if (!nextPaymentDate || !amount || !numPayments) {
+      alert("Please fill all fields before updating!");
       return;
     }
 
@@ -70,23 +78,35 @@ export default function PaymentDetails() {
     // Update payment record
     await updateDoc(doc(db, "payments", id), {
       status: "paid",
+      amount,
+      numPayments,
     });
 
     alert("✅ Payment updated successfully!");
     navigate("/admin/paymentList");
   };
 
-  if (!payment || !hostler) return <p className="text-center mt-10">Loading...</p>;
+  if (!payment || !hostler)
+    return <p className="text-center mt-10">Loading...</p>;
 
   return (
     <div className="p-6 max-w-3xl mx-auto bg-white shadow rounded-lg">
       <h2 className="text-2xl font-semibold mb-4">Payment Details</h2>
 
       <div className="space-y-4">
-        <p><strong>Name:</strong> {payment.name}</p>
-        <p><strong>Joining Date:</strong> {hostler.joiningDate}</p>
-        <p><strong>Due Date:</strong> {hostler.nextPaymentDate}</p>
-        <p><strong>Payment Date:</strong> {new Date(payment.paymentDate?.seconds * 1000).toLocaleString()}</p>
+        <p>
+          <strong>Name:</strong> {payment.name}
+        </p>
+        <p>
+          <strong>Joining Date:</strong> {hostler.joiningDate}
+        </p>
+        <p>
+          <strong>Due Date:</strong> {hostler.nextPaymentDate}
+        </p>
+        <p>
+          <strong>Payment Date:</strong>{" "}
+          {new Date(payment.paymentDate?.seconds * 1000).toLocaleString()}
+        </p>
 
         <div>
           <strong>Screenshot:</strong>
@@ -95,6 +115,31 @@ export default function PaymentDetails() {
             alt="Payment Screenshot"
             className="w-full max-w-md mt-2 border rounded-lg"
           />
+        </div>
+
+        {/* ✅ New Fields */}
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div>
+            <label className="block font-medium mb-1">Number of Payments</label>
+            <input
+              type="number"
+              value={numPayments}
+              onChange={(e) => setNumPayments(e.target.value)}
+              className="border border-gray-300 rounded-lg p-2 w-full"
+              placeholder="e.g. 2"
+            />
+          </div>
+
+          <div>
+            <label className="block font-medium mb-1">Amount (₹)</label>
+            <input
+              type="text"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="border border-gray-300 rounded-lg p-2 w-full"
+              placeholder="e.g. 7000"
+            />
+          </div>
         </div>
 
         <div>
